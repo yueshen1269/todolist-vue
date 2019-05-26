@@ -11,7 +11,7 @@
         <span>{{index+1}}</span>
         <span class="content">{{ todo.detail}}</span>
         <input type="button" value="delete"
-        @click="removeItem(index)">
+        @click="removeItem(index)"  >
       </li>
     </ul>
     <div v-show="left" class="left"><strong>{{left}}</strong>left</div>
@@ -39,7 +39,7 @@ export default {
         deleted: false,
       },
       todos: lsLists,
-      checkall: false
+      checkall: false,
     }
   },
   methods: {
@@ -105,12 +105,22 @@ ul {
 }
 li {
   margin: 0 10px;
+  padding-right: 10%;
   font-size: 36px;
   border-bottom: 1px solid antiquewhite;
   background-color: #fff;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+}
+li>input:last-child {
+  position: absolute;
+  top: -9999em;
+}
+li:hover input{
+  top: 10px;
+  right: 5px;
 }
 .todolist >input {
   border: 2px solid deeppink;
@@ -133,6 +143,7 @@ a {
   text-decoration: line-through;
   color: darkgray;
 }
+
 .left {
   margin: 10px auto;
   width: 50%;
