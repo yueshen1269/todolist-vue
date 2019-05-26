@@ -1,6 +1,7 @@
 <template>
   <div class="todolist">
     <h1 v-text="title"></h1>
+    <input type="checkbox" @click="all" :checked="checkall"></input>
     <input type="text" v-model="newtodo.detail" @keyup.enter="addTodo" autofocus autocomplete="off"
     placeholder="add new todo">
     <ul v-if="todos[0]">
@@ -8,12 +9,12 @@
         completed:todo.iscompleted}" >
         <input type="checkbox" :checked="todo.iscompleted"  @click="completed(index)">
         <span>{{index+1}}</span>
-        <span>{{ todo.detail}}</span>
+        <span class="content">{{ todo.detail}}</span>
         <input type="button" value="delete"
         @click="removeItem(index)">
       </li>
     </ul>
-    <div>{{left}}left</div>
+    <div v-show="left" class="left"><strong>{{left}}</strong>left</div>
   </div>
 </template>
 
@@ -35,10 +36,10 @@ export default {
       newtodo: {
         detail: "",
         iscompleted: false,
-        deleted: false
+        deleted: false,
       },
-      todos: lsLists
-
+      todos: lsLists,
+      checkall: false
     }
   },
   methods: {
@@ -65,8 +66,16 @@ export default {
     },
     completed(i) {
       this.todos[i].iscompleted = !this.todos[i].iscompleted;
+      if(this.left===0) this.checkall=true;
+      else this.checkall=false;
       this.todos.sort(sortF);
       ls.setItem("lists",JSON.stringify(this.todos));
+    },
+    all() {
+      this.checkall=!this.checkall
+      this.todos.forEach((item) => {
+        return item.iscompleted=this.checkall;
+      })
     }
   },
   computed: {
@@ -89,11 +98,29 @@ h1, h2 {
 ul {
   list-style-type: none;
   padding: 0;
+  border: 1px solid navajowhite;
+  width: 50%;
+  margin: 10px auto 0;
+  box-shadow: 3px 3px 5px wheat;
 }
 li {
   margin: 0 10px;
   font-size: 36px;
-
+  border-bottom: 1px solid antiquewhite;
+  background-color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.todolist >input {
+  border: 2px solid deeppink;
+  outline: none;
+}
+.content {
+  width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 a {
   color: #42b983;
@@ -104,5 +131,16 @@ a {
 }
 .completed {
   text-decoration: line-through;
+  color: darkgray;
+}
+.left {
+  margin: 10px auto;
+  width: 50%;
+  text-align: center;
+
+}
+strong {
+  color: red;
+  padding-right: 10px;
 }
 </style>
