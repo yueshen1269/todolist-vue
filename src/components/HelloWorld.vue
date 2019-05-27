@@ -1,25 +1,25 @@
 <template>
   <div class="todolist">
     <h1 v-text="title"></h1>
-    <input type="checkbox" :checked="checkall" />
     <input type="text" v-model="newtodo.detail"  autofocus autocomplete="off"
     placeholder="add new todo" @keyup.enter="addItem">
     <ul v-if="itemdata[0]">
       <li v-for="(todo, index) in itemdata" :key="todo.detail" :class="{
         completed:todo.iscompleted}" >
-        <input type="checkbox" :checked="todo.iscompleted"  >
+        <input type="checkbox" :checked="todo.iscompleted" @click="changeCompleteStatus(todo)" >
         <span>{{index+1}}</span>
-        <span class="content">{{ todo.detail}}</span>
+        <span class="content" :class="{completed:todo.iscompleted}">{{ todo.detail}}</span>
         <input type="button" value="delete"
         @click="deleteItem(todo.detail)">
       </li>
     </ul>
-    <div  class="left"><strong></strong>left</div>
+    <div class="left" v-if="left"><strong>{{ left }}</strong>left</div>
+    <p v-if="!left&&itemdata[0]" class="congratulation">ALL DONE!!!~</p>
   </div>
 </template>
 
 <script>
-import {reqData, setData, delData} from "../api/index"
+import {reqData, setData, delData, updateData} from "../api/index"
 function sortF(a, b) {
   return a.iscompleted-b.iscompleted
 }
@@ -49,10 +49,16 @@ export default {
     async deleteItem(detail) {
       const params = {detail: detail}
       this.itemdata = await delData({params: params});
+    },
+    async changeCompleteStatus(todo) {
+      todo.iscompleted = !todo.iscompleted;
+      this.itemdata = await updateData(todo)
     }
   },
   computed: {
-
+    left() {
+      return this.itemdata.filter(item => item.iscompleted===false).length;
+    }
   },
   created() {
     this.getdata();
@@ -103,6 +109,9 @@ li:hover input{
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.completed {
+  text-decoration: line-through;
+}
 a {
   color: #42b983;
 }
@@ -124,5 +133,10 @@ a {
 strong {
   color: red;
   padding-right: 10px;
+}
+.congratulation {
+  font-size: 30px;
+  color: red;
+  margin-top: 10px;
 }
 </style>

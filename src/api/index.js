@@ -8,3 +8,5 @@ export const reqData = () => ajax(`${BASE_URL}/data`)
 export const setData = (newitem) => ajax(`${BASE_URL}/data`, newitem, 'POST')
 
 export const delData = (newitem) => ajax(`${BASE_URL}/data`, newitem, 'DELETE')
+
+export const updateData = (changeditem) => ajax(`${BASE_URL}/data`, changeditem, 'PUT')
