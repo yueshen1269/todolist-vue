@@ -1,30 +1,25 @@
 <template>
   <div class="todolist">
     <h1 v-text="title"></h1>
-    <input type="checkbox" @click="all" :checked="checkall"></input>
-    <input type="text" v-model="newtodo.detail" @keyup.enter="addTodo" autofocus autocomplete="off"
-    placeholder="add new todo">
-    <ul v-if="todos[0]">
-      <li v-for="(todo,index) in todos" :key="todo.detail" :class="{
+    <input type="checkbox" :checked="checkall" />
+    <input type="text" v-model="newtodo.detail"  autofocus autocomplete="off"
+    placeholder="add new todo" @keyup.enter="addItem">
+    <ul v-if="itemdata[0]">
+      <li v-for="(todo, index) in itemdata" :key="todo.detail" :class="{
         completed:todo.iscompleted}" >
-        <input type="checkbox" :checked="todo.iscompleted"  @click="completed(index)">
+        <input type="checkbox" :checked="todo.iscompleted"  >
         <span>{{index+1}}</span>
         <span class="content">{{ todo.detail}}</span>
         <input type="button" value="delete"
-        @click="removeItem(index)"  >
+        @click="deleteItem(todo.detail)">
       </li>
     </ul>
-    <div v-show="left" class="left"><strong>{{left}}</strong>left</div>
+    <div  class="left"><strong></strong>left</div>
   </div>
 </template>
 
 <script>
-var ls = window.localStorage;
-var lsLists = new Array();
-if (ls.getItem("lists") != null) {
-  //从localStorage取出JSON字符串，并转为对象
-  lsLists = JSON.parse(ls.getItem("lists"));
-}
+import {reqData, setData, delData} from "../api/index"
 function sortF(a, b) {
   return a.iscompleted-b.iscompleted
 }
@@ -35,58 +30,34 @@ export default {
       title: "a todolist",
       newtodo: {
         detail: "",
-        iscompleted: false,
-        deleted: false,
+        iscompleted: false
       },
-      todos: lsLists,
+      itemdata: [],
       checkall: false,
     }
   },
   methods: {
-    // togglestatus(todo) {
-    //   todo.iscompleted = !todo.iscompleted;
-    // },
-    addTodo: function () {
-      if(this.newtodo.detail.trim() == "") return;
-      this.todos.unshift(this.newtodo);
-        //根据完成状况排序
-        this.todos.sort(sortF);
-        //将对象转为JSON字符串
-        ls.setItem("lists",JSON.stringify(this.todos));
-        this.newtodo = {
-          detail: "",
-          iscompleted: false,
-          deleted: false
-        };
-        // console.log(lsLists)
+    async getdata() {
+      this.itemdata = await reqData();
     },
-    removeItem(index) {
-      this.todos.splice(index, 1)
-      ls.setItem("lists",JSON.stringify(this.todos));
-    },
-    completed(i) {
-      this.todos[i].iscompleted = !this.todos[i].iscompleted;
-      if(this.left===0) this.checkall=true;
-      else this.checkall=false;
-      this.todos.sort(sortF);
-      ls.setItem("lists",JSON.stringify(this.todos));
-    },
-    all() {
-      this.checkall=!this.checkall
-      this.todos.forEach((item) => {
-        return item.iscompleted=this.checkall;
+    async addItem() {
+      this.itemdata = await setData(this.newtodo);
+      this.$nextTick(() => {
+        this.newtodo.detail = ""
       })
+    },
+    async deleteItem(detail) {
+      const params = {detail: detail}
+      this.itemdata = await delData({params: params});
     }
   },
   computed: {
-    left() {
-      const len = this.todos.filter(function(item) {
-        return item.iscompleted===false;
-      }).length;
-      return len;
-    }
-  }
 
+  },
+  created() {
+    this.getdata();
+    console.log(this.itemdata, "created")
+  }
 }
 </script>
 
